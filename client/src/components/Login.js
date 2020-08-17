@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { authorize, register } from "../store/actions";
 import { connect } from "react-redux";
+import { authUser } from "../localStorageNames";
 
 class Login extends Component {
   constructor(props) {
@@ -19,14 +20,21 @@ class Login extends Component {
     this.setState({ email: "", password: "" });
   }
   handleLogin = async (ev) => {
-    const data = await this.props.authorize("/api/auth/login", {
-      ...this.state,
-    });
-    if (!data.errors) {
-      window.alert(data.message);
-    } else {
-      window.alert(data.errors);
-      return;
+    try {
+      const data = await this.props.authorize("/api/auth/login", {
+        ...this.state,
+      });
+      if (!data.errors) {
+        window.alert(data.message);
+        localStorage.setItem(
+          authUser,
+          JSON.stringify({ token: data.token, userId: data.userId })
+        );
+      } else {
+        window.alert(data.errors);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
   registerHandler = async (ev) => {
@@ -53,7 +61,17 @@ class Login extends Component {
     return (
       <div className="row">
         <div className="col s12">
-          <h6>Авторизация</h6>
+          <h1
+            style={{
+              textAlign: "center",
+              color: "#E30B5D",
+              padding: "1em",
+              fontFamily: "cursive",
+              fontStyle: "italic",
+            }}
+          >
+            Welcome to anonymous chat!
+          </h1>
 
           <div className="input-field col s6">
             <input
@@ -63,6 +81,7 @@ class Login extends Component {
               value={this.state.email}
               onChange={this.handleChange}
               name="email"
+              placeholder="Enter or register email!"
             />
           </div>
           <div className="input-field col s6">
@@ -73,20 +92,21 @@ class Login extends Component {
               value={this.state.password}
               onChange={this.handleChange}
               name="password"
+              placeholder="Enter or register password!"
             />
           </div>
-          <div>
+          <div align="center">
             <button
-              className="btn btn-primary btn-sm m-3"
+              className="btn btn-primary btn-sm m-2"
               onClick={this.handleLogin}
             >
-              Войти
+              Log in
             </button>
             <button
-              className="btn btn-primary btn-sm m-3"
+              className="btn btn-primary btn-sm m-2"
               onClick={this.registerHandler}
             >
-              Зарегистрироваться
+              Sign up
             </button>
           </div>
         </div>
