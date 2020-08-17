@@ -7,7 +7,7 @@ const mongouri = config.get("mongouri");
 
 app = express();
 app.use(express.json({ extended: true }));
-app.use("/api/auth", require("./routes/home.routes"));
+app.use("/api/auth", require("./routes/auth.routes"));
 
 const start = async () => {
   try {

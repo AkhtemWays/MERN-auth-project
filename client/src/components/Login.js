@@ -1,6 +1,8 @@
 import React, { Component } from "react";
+import { authorize, register } from "../store/actions";
+import { connect } from "react-redux";
 
-export default class Login extends Component {
+class Login extends Component {
   constructor(props) {
     super(props);
 
@@ -13,17 +15,37 @@ export default class Login extends Component {
   handleChange = (ev) => {
     this.setState({ [ev.target.name]: ev.target.value });
   };
+  componentWillUnmount() {
+    this.setState({ email: "", password: "" });
+  }
   handleLogin = async (ev) => {
-    try {
-      const response = await fetch("api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ ...this.state }),
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (e) {
-      console.log("Невышло взять данные ", e.message);
+    const data = await this.props.authorize("/api/auth/login", {
+      ...this.state,
+    });
+    if (!data.errors) {
+      window.alert(data.message);
+    } else {
+      window.alert(data.errors);
+      return;
+    }
+  };
+  registerHandler = async (ev) => {
+    const data = await this.props.register("/api/auth/register", "POST", {
+      ...this.state,
+    });
+    if (!data.errors) {
+      window.alert(data.message);
+      return;
+    } else if (data.errors && typeof data.errors == "object") {
+      let msg = "Неверно указаны следующие данные: \n";
+      for (let error of data.errors) {
+        msg += `${error.param}: ${error.msg}\n`;
+      }
+      window.alert(msg);
+      return;
+    } else if (data.errors && typeof data.errors === "string") {
+      window.alert(data.errors);
+      return;
     }
   };
 
@@ -60,7 +82,10 @@ export default class Login extends Component {
             >
               Войти
             </button>
-            <button className="btn btn-primary btn-sm m-3">
+            <button
+              className="btn btn-primary btn-sm m-3"
+              onClick={this.registerHandler}
+            >
               Зарегистрироваться
             </button>
           </div>
@@ -69,3 +94,14 @@ export default class Login extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  isAuthorized: state.auth.isAuthorized,
+});
+const mapDispatchToProps = (dispatch) => ({
+  authorize: (url, body) => dispatch(authorize(url, body)),
+  register: (url, method, body, headers) =>
+    dispatch(register(url, method, body, headers)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
