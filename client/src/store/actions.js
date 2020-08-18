@@ -48,7 +48,6 @@ export function register(
         headers,
       });
       const data = await response.json();
-      console.log(data);
       return data;
     } catch (e) {
       console.log("Невышло взять данные ", e.message);
