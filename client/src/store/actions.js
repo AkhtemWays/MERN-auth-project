@@ -14,9 +14,7 @@ export function authorize(url, body = null) {
         headers,
       });
       const data = await response.json();
-      console.log(data);
       if (!data.errors) {
-        console.log("dispatching...");
         dispatch({
           type: AUTHORIZE,
         });

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { authorize, register } from "../store/actions";
 import { connect } from "react-redux";
-import { authUser } from "../localStorageNames";
+import { login } from "../utils/login";
 
 class Login extends Component {
   constructor(props) {
@@ -26,15 +26,12 @@ class Login extends Component {
       });
       if (!data.errors) {
         window.alert(data.message);
-        localStorage.setItem(
-          authUser,
-          JSON.stringify({ token: data.token, userId: data.userId })
-        );
+        login(data);
       } else {
         window.alert(data.errors);
       }
     } catch (e) {
-      console.log(e);
+      console.log(`Login error, ${e.message}`);
     }
   };
   registerHandler = async (ev) => {
@@ -43,17 +40,14 @@ class Login extends Component {
     });
     if (!data.errors) {
       window.alert(data.message);
-      return;
     } else if (data.errors && typeof data.errors == "object") {
       let msg = "Неверно указаны следующие данные: \n";
       for (let error of data.errors) {
         msg += `${error.param}: ${error.msg}\n`;
       }
       window.alert(msg);
-      return;
     } else if (data.errors && typeof data.errors === "string") {
       window.alert(data.errors);
-      return;
     }
   };
 
