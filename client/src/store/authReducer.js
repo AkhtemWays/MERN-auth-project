@@ -1,7 +1,8 @@
-import { AUTHORIZE, FAILED_TO_FETCH, LOGOUT } from "./types";
+import { AUTHORIZE, FAILED_TO_FETCH, LOGOUT, LOAD_USERS } from "./types";
 
 const initialData = {
   isAuthorized: false,
+  users: [],
 };
 
 export const authReducer = (state = initialData, action) => {
@@ -19,6 +20,11 @@ export const authReducer = (state = initialData, action) => {
       return {
         ...state,
         isAuthorized: false,
+      };
+    case LOAD_USERS:
+      return {
+        ...state,
+        users: action.payload,
       };
 
     default:

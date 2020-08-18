@@ -1,4 +1,4 @@
-import { AUTHORIZE, FAILED_TO_FETCH } from "./types";
+import { AUTHORIZE, FAILED_TO_FETCH, LOAD_USERS } from "./types";
 
 export function authorize(url, body = null) {
   return async (dispatch) => {
@@ -55,6 +55,40 @@ export function register(
         type: FAILED_TO_FETCH,
       });
       return null;
+    }
+  };
+}
+
+export function getAllUsers(url, token) {
+  return async (dispatch) => {
+    console.log(token);
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        body: null,
+        headers: headers,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && !data.errors && data.users) {
+          dispatch({
+            type: LOAD_USERS,
+            payload: data.users,
+          });
+          return data;
+        }
+      } else {
+        console.log(response);
+      }
+    } catch (e) {
+      console.log(`Client getAllUsers error, ${e.message}`);
+      dispatch({
+        type: FAILED_TO_FETCH,
+      });
     }
   };
 }

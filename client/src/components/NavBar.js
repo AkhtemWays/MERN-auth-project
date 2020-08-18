@@ -3,12 +3,33 @@ import { NavLink } from "react-router-dom";
 import { logout } from "../utils/logout";
 import { LOGOUT } from "../store/types";
 import { connect } from "react-redux";
+import { getAllUsers } from "../store/actions";
+import { authUser } from "../localStorageNames";
+import { login } from "../utils/login";
 
 class NavBar extends Component {
-  handleLogout = () => {
+  handleLogout = (ev) => {
     logout();
     this.props.logout();
   };
+  handleLoad = (ev) => {
+    ev.preventDefault();
+    this.getData();
+  };
+  async getData() {
+    try {
+      const localData = JSON.parse(localStorage.getItem(authUser));
+      if (localData && localData.token) {
+        login(localData);
+        await this.props.getAllUsers("/api/users/all", localData.token);
+      } else {
+        this.handleLogout();
+        window.alert("Авторизуйтесь снова");
+      }
+    } catch (e) {
+      console.log(`Client handleLoad failed ${e.message}`);
+    }
+  }
   render() {
     return (
       <>
@@ -32,7 +53,9 @@ class NavBar extends Component {
                 <NavLink to="/admin">Components</NavLink>
               </li>
               <li>
-                <NavLink to="/admin">Javascript</NavLink>
+                <NavLink to="/admin" onClick={this.handleLoad}>
+                  Load users
+                </NavLink>
               </li>
               <li>
                 <NavLink to="/login" onClick={this.handleLogout}>
@@ -49,6 +72,7 @@ class NavBar extends Component {
 
 const mapDispatchToProps = (dispatch) => ({
   logout: () => dispatch({ type: LOGOUT }),
+  getAllUsers: (url, token) => dispatch(getAllUsers(url, token)),
 });
 
 export default connect(null, mapDispatchToProps)(NavBar);
